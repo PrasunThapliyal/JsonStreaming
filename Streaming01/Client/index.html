@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html>
+<body>
+
+    <h1>HTML DOM Events</h1>
+    <h2>The onclick Event</h2>
+
+    <button onclick="myFunction()">Click me</button>
+    <button onclick="myFunction2()">Click me 2</button>
+
+    <p id="demo"></p>
+
+    <script>
+        async function myFunction() {
+            document.getElementById("demo").innerHTML = "Hello World";
+
+            const response = await fetch("/WeatherForecast/GetWeatherForecast");
+            const reader = response.body.getReader();
+
+            while (true) {
+                const { value, done } = await reader.read();
+
+                if (done) break;
+                console.log('Received: ', value);
+
+                const textDecoder = new TextDecoder();
+                let textValue = textDecoder.decode(value);
+                console.log('Received text: ', textValue);
+
+                //console.log('Received Json: ', JSON.parse(textValue));
+            }
+            console.log('Response fully received');
+        }
+
+        async function myFunction2() {
+            document.getElementById("demo").innerHTML = "Hello World";
+
+            const response = await fetch("/WeatherForecast/GetStreamingData");
+            const reader = response.body.getReader();
+
+            while (true) {
+                const { value, done } = await reader.read();
+
+                if (done) break;
+                console.log('Received: ', value);
+
+                const textDecoder = new TextDecoder();
+                let textValue = textDecoder.decode(value);
+                console.log('Received text: ', textValue);
+
+                console.log('Received Json: ', JSON.parse(textValue));
+            }
+            console.log('Response fully received');
+        }
+    </script>
+
+</body>
+</html>
