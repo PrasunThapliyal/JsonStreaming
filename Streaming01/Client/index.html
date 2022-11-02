@@ -7,6 +7,7 @@
 
     <button onclick="myFunction()">Click me</button>
     <button onclick="myFunction2()">Click me 2</button>
+    <button onclick="myFunction3()">Click me 3</button>
 
     <p id="demo"></p>
 
@@ -52,6 +53,71 @@
             }
             console.log('Response fully received');
         }
+
+        // This is the UI example to follow
+        async function myFunction4() {
+            document.getElementById("demo").innerHTML = "Hello World";
+
+            let swStart = new Date().getTime();
+            let startTime = new Date().getTime();
+            let startTimeJsonLine = new Date().getTime();
+
+            const response = await fetch("/equipmenttopologyplanning/api/v1/Reports/oms/c4fb7061-e3c0-450c-b3ce-770d1a972b66?useNetworkDescriptions=true",
+                {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application.json',
+                        'Content-Type': 'application/json'
+
+                    },
+                    body: JSON.stringify({ "startRow": 0, "endRow": 200, "rowGroupCols": [], "valueCols": [], "pivotCols": [], "pivotMode": false, "groupKeys": [], "filterModel": [], "sortModel": [], "pageSize": 200, "pageNumber": 1, "filterExpression": "" })
+                });
+
+            const reader = response.body.getReader(); // -------------- (A) Get a stream reader for the response
+            
+            const textDecoder = new TextDecoder();
+
+            let lastLine = ''; // This is placeholder for residue left over after end of a valid json string
+            let lineCount = 0;
+
+            while (true) {
+                const { value, done } = await reader.read(); // -------------- (B) // Read available chunk from the stream; these are raw bytes
+
+                if (done) break;
+
+                let endTime = new Date().getTime();
+                let timeTaken = endTime - startTime;
+
+                console.log('Received raw chunk of bytes: %d', value.byteLength);
+                console.log('Time taken: %d', timeTaken);
+
+                let textValue = textDecoder.decode(value); // -------------- (C) // Convert raw bytes to string
+                //console.log('Received text: %s', textValue);
+
+                // Merge with last partial chunk
+                let mergedText = `${lastLine}${textValue}`;
+
+                const lines = mergedText.split(/\r\n|[\r\n]/g);  // -------------- (D) In my case, I'm sending JSON chunks separated by newline
+
+                lastLine = lines.pop() || '';
+
+                for (const line of lines) {
+                    lineCount++;
+                    console.log('Received Json: ', JSON.parse(line));  // -------------- (E) Parse string as JSON
+                    let endTimeJsonLine = new Date().getTime();
+                    let timeTakenJsonLine = endTimeJsonLine - startTimeJsonLine;
+                    console.log('\[%d\] %s %d ms', lineCount, 'Time taken JsonLine: ', timeTakenJsonLine);
+                    startTimeJsonLine = endTimeJsonLine;
+                }
+            }
+            if (lastLine !== '') {
+                console.log('Received Last Json: ', JSON.parse(line));
+            }
+
+            let swEnd = new Date().getTime();
+            console.log('Response fully received in %d ms', (swEnd - swStart));
+        }
+
     </script>
 
 </body>

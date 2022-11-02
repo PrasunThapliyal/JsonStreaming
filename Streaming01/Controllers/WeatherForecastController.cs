@@ -45,7 +45,7 @@ namespace Streaming01.Controllers
         {
             for (int i = 1; i <= 10; i++)
             {
-                await Task.Delay(1000);
+                //await Task.Delay(1000);
                 yield return new WeatherForecast
                 {  
                     Date = DateTime.Now.AddDays(i),
@@ -94,7 +94,7 @@ namespace Streaming01.Controllers
                     await streamWriter.WriteLineAsync(stringWeatherForecast).ConfigureAwait(false);
                     await streamWriter.FlushAsync().ConfigureAwait(false);
                     
-                    await Task.Delay(3 * 1000);
+                    //await Task.Delay(3 * 1000);
                 }
             }
 
